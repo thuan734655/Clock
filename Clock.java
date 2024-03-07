@@ -2,22 +2,34 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Clock  implements Runnable{
 
     Timer timer = new Timer();
-    JLabel time = new JLabel("tyd");
+    JLabel time = new JLabel("");
     JTextField enterHour = new JTextField();
     JButton button = new JButton("Click");
     SpringLayout springLayout = new SpringLayout();
 
+    int muiGio;
+    public Clock(String muiGio) {
+        this.muiGio = Integer.parseInt(muiGio);
+    }
+
     public void updateTime() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-        time.setText(  simpleDateFormat.format(new Date()));
+      try {
+          ZoneId customZone = ZoneId.of("GMT" + (muiGio >= 0 ? "+" : "") + muiGio);
+          LocalTime currentTime = LocalTime.now(customZone);
+          time.setText(String.format("%02d:%02d:%02d", currentTime.getHour(), currentTime.getMinute(), currentTime.getSecond()));
+      }
+      catch (Exception e) {
+          JOptionPane.showMessageDialog(null,"mui gio khong hop le");
+
+      }
     }
 
     public void run(){
@@ -41,9 +53,14 @@ public class Clock  implements Runnable{
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              SubClock sub = new SubClock(enterHour.getText());
-                Thread t1 = new Thread(sub);
-                t1.start();
+                if(Integer.parseInt(enterHour.getText()) > 18 || Integer.parseInt(enterHour.getText()) < -18 ) {
+                    JOptionPane.showMessageDialog(null,"mui gio khong hop le");
+                }
+                else {
+                    Clock sub = new Clock(enterHour.getText());
+                    Thread t1 = new Thread(sub);
+                    t1.start();
+                }
             }
 
         });
